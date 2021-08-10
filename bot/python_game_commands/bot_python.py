@@ -205,7 +205,7 @@ class VillageShop(WorldInventory, TableOfWealth):
 		return output
 
 
-	def buy(self, player_id, item_name, amount):
+	def buy(self, player_id, item_name, amount=1):
 		#gets the item price
 		item_cost = self.exec_with_fetchone(f"""
 				SELECT "item_price" FROM VillageShop WHERE "item_name"="{item_name}"
