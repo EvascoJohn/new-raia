@@ -6,8 +6,6 @@ from dotenv import load_dotenv
 from discord.ext import commands
 
 
-
-#load the token
 load_dotenv()
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
