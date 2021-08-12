@@ -194,6 +194,8 @@ class CurrencyValues(object):
 			self.silver = cd.silver
 			self.gold = cd.gold
 
+
+
 		
 
 class VillageShop(WorldInventory, TableOfWealth):
@@ -352,4 +354,4 @@ if __name__ == "__main__":
 	c = "Warrior"
 	gc = GameCommands(db)
 	h = Hunt(db)
-	print(gc.new_player((i,c)))
+	print(gc.new_player(i))
