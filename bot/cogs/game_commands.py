@@ -1,10 +1,12 @@
 import discord
 from discord.ext import commands
 from bot.python_game_commands import bot_python
+from bot.python_game_commands import hunt_system
 
 db = "bot/gamedb.db"
 
 game_com = bot_python.GameCommands(db)
+hunt_sys = hunt_system.MonsterTable(db)
 
 class Commands(commands.Cog):
 
@@ -61,6 +63,9 @@ class Commands(commands.Cog):
 		embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
 		embed.add_field(name=f"Cause of decline on selling {item_name}", value=f"{content}", inline=False)
 		await ctx.send(embed=embed)
+
+
+	
 	
 
 	@commands.command(name="inv")

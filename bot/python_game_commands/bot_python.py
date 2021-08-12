@@ -1,4 +1,6 @@
 import sqlite3
+import random
+
 
 class ShortDBCommands(object):
 
@@ -37,7 +39,6 @@ class ShortDBCommands(object):
 
 class GeneralPlayers(ShortDBCommands):
 
-
 	def __init__(self, database):
 		""" Initiallizes __init__ with database """
 		self.database = database
@@ -62,10 +63,19 @@ class GeneralPlayers(ShortDBCommands):
 
 
 	def get_player(self, player_id):
-		output = self.exec_with_fetchall(f"""
-										SELECT "discord_id","player_class" FROM GeneralPlayersDatabase WHERE discord_id="{player_id}"
+		output = self.exec_with_fetchone(f"""
+										SELECT "discord_id","player_class","player_hp" FROM GeneralPlayersDatabase WHERE discord_id="{player_id}"
 								""")
 		return output
+
+	def set_player_health(self, player_id, hp):
+		self.exec_with_commit(f"""
+			UPDATE GeneralPlayersDatabase SET "player_hp" = {hp} WHERE "discord_id"="{player_id}"
+			""")
+
+
+	def get_class(self, player_id):
+		pass
 
 
 
@@ -98,14 +108,12 @@ class TableOfWealth(ShortDBCommands):
 
 	def __init__(self, database):
 		self.database = database
-
   
 	def add_gold(self, player_id, amount):
 		#increases gold
 		self.exec_with_commit(f"""
 				UPDATE TableOfWealth SET "gold" = "gold" + {amount} WHERE "owner_id"="{player_id}"
 			""")
-
 
 	def starter(self, player_id):
 		acc_exists = self.exec_with_fetchall(f""" SELECT * FROM TableOfWealth WHERE "owner_id"="{player_id}" """)
@@ -114,20 +122,17 @@ class TableOfWealth(ShortDBCommands):
 					INSERT INTO TableOfWealth(owner_id, gold, silver, copper) VALUES("{player_id}", 0, 0, 1000)
 				""")
 
-
 	def add_silver(self, player_id, amount):
 		#increases silver
 		self.exec_with_commit(f"""
 				UPDATE TableOfWealth SET "silver" = "silver" + {amount} WHERE "owner_id"="{player_id}"
 			""")
 
-
 	def add_copper(self, player_id, amount):
 		#increases copper
 		self.exec_with_commit(f"""
 				UPDATE TableOfWealth SET "copper" = "copper" + {amount} WHERE "owner_id"="{player_id}"
 			""")
-
 
 	def deduct_gold(self, player_id, amount):
 		#decreases gold
@@ -146,7 +151,6 @@ class TableOfWealth(ShortDBCommands):
 		self.exec_with_commit(f"""
 				UPDATE TableOfWealth SET "copper" = "copper" - {amount} WHERE "owner_id"="{player_id}"
 			""")
-
 
 	def get_wealth(self, player_id):
 		output = self.exec_with_fetchall(f""" SELECT "gold", "silver", "copper" FROM TableOfWealth WHERE "owner_id"="{player_id}" """)
@@ -197,13 +201,11 @@ class VillageShop(WorldInventory, TableOfWealth):
 	def __init__(self, database):
 		self.database = database
 
-
 	def shop(self):
 		output = self.exec_with_fetchall(f"""
 			SELECT * FROM VillageShop
 			""")
 		return output
-
 
 	def buy(self, player_id, item_name, amount=1):
 		#gets the item price
@@ -243,7 +245,6 @@ class VillageShop(WorldInventory, TableOfWealth):
 				
 				return e.args[0]
 		return "item succesfully baught."
-
 
 	def sell(self, player_id, item_name, amount):
 		#gets the item price
@@ -286,8 +287,47 @@ class VillageShop(WorldInventory, TableOfWealth):
 
 
 
-class GameCommands(GeneralPlayers, VillageShop, TableOfWealth):
+class MonsterTable(ShortDBCommands):
 
+	def __init__(self, database):
+		self.database = database
+
+	def get_monster(self):
+		import random
+		monsters = self.exec_with_fetchall("""
+					SELECT * FROM MonsterTable
+			""")
+		pick = monsters[int(random.randint(0, len(monsters)-1))]
+		name, damage, health, copper_drop = pick
+		return pick
+
+ 
+
+class Hunt(GeneralPlayers, MonsterTable, TableOfWealth):
+
+	def __init__(self, database):
+		self.database = database
+
+	def initiate_fight(self, player_id):
+		#get random monster stats
+		monster_list = self.get_monster()
+		name, damage, health, copper_drop = monster_list
+		#get player stats
+		player_id, player_class, player_hp = self.get_player(player_id)
+
+		if damage > player_hp:
+			self.set_player_health(player_id, 0)
+		elif damage < player_hp:
+			player_hp = player_hp - damage
+			self.set_player_health(player_id, player_hp)
+			self.add_copper(player_id, copper_drop)
+		return name, damage, copper_drop, player_hp
+
+
+
+
+
+class GameCommands(GeneralPlayers, VillageShop, TableOfWealth):
 
 	def __init__(self, database):
 		super().__init__(database)#Initallizes the GeneralPlayers class.
@@ -307,7 +347,9 @@ class GameCommands(GeneralPlayers, VillageShop, TableOfWealth):
 
 
 if __name__ == "__main__":
+	db ="GameDB.db"
 	i = "519807756711649291"
 	c = "Warrior"
-	x = GameCommands(db)
-	print(x.seek_player(i))
+	gc = GameCommands(db)
+	h = Hunt(db)
+	print(gc.new_player((i,c)))
