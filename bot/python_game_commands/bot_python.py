@@ -43,11 +43,11 @@ class GeneralPlayers(ShortDBCommands):
 		""" Initiallizes __init__ with database """
 		self.database = database
 
-	def add_player(self, player_id, player_class):
+	def add_player(self, player_id):
 		""" runs the "sql_line" then accompanies it with commit. """
 		try:
-			self.exec_with_commit(f"""	INSERT INTO GeneralPlayersDatabase(discord_id, player_class)
-										VALUES("{player_id}","{player_class}");
+			self.exec_with_commit(f"""	INSERT INTO GeneralPlayersDatabase(discord_id)
+										VALUES("{player_id}");
 									""")
 		except sqlite3.IntegrityError as e:
 			#this will trigger if the player_id is already in the database
@@ -64,7 +64,7 @@ class GeneralPlayers(ShortDBCommands):
 
 	def get_player(self, player_id):
 		output = self.exec_with_fetchone(f"""
-										SELECT "discord_id","player_class","player_hp" FROM GeneralPlayersDatabase WHERE discord_id="{player_id}"
+										SELECT "discord_id","player_hp" FROM GeneralPlayersDatabase WHERE discord_id="{player_id}"
 								""")
 		return output
 
@@ -315,10 +315,11 @@ class Hunt(GeneralPlayers, MonsterTable, TableOfWealth):
 		monster_list = self.get_monster()
 		name, damage, health, copper_drop = monster_list
 		#get player stats
-		player_id, player_class, player_hp = self.get_player(player_id)
-
-		if damage > player_hp:
-			self.set_player_health(player_id, 0)
+		player_id, player_hp = self.get_player(player_id)
+		damage = 20
+		if damage >= player_hp:
+			self.set_player_health(player_id, 100)
+			return "Player Died."
 		elif damage < player_hp:
 			player_hp = player_hp - damage
 			self.set_player_health(player_id, player_hp)
@@ -334,10 +335,10 @@ class GameCommands(GeneralPlayers, VillageShop, TableOfWealth):
 	def __init__(self, database):
 		super().__init__(database)#Initallizes the GeneralPlayers class.
 
-	def new_player(self, player_tuple):
+	def new_player(self, player_id):
 		#the line for inserting.
-		output = self.add_player(player_tuple[0], player_tuple[1])
-		self.starter(player_tuple[0])
+		output = self.add_player(player_id)
+		self.starter(player_id)
 		return output
 
 	def seek_player(self, player_id):

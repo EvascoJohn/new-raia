@@ -1,12 +1,11 @@
 import discord
 from discord.ext import commands
 from bot.python_game_commands import bot_python
-from bot.python_game_commands import hunt_system
 
 db = "bot/gamedb.db"
 
 game_com = bot_python.GameCommands(db)
-hunt_sys = hunt_system.MonsterTable(db)
+game_hun = bot_python.Hunt(db)
 
 class Commands(commands.Cog):
 
@@ -19,11 +18,8 @@ class Commands(commands.Cog):
 
 
 	@commands.command(name='join')
-	async def new_join(self, ctx, player_class=None):
-		if player_class == None:
-			await ctx.send(game_com.new_player((str(ctx.author.id), str(player_class))))
-		else:
-			await ctx.send(game_com.new_player((str(ctx.author.id), str(player_class))))
+	async def new_join(self, ctx):
+		await ctx.send(game_com.new_player((str(ctx.author.id))))
 
 
 	@commands.command(name='shop')
@@ -65,7 +61,20 @@ class Commands(commands.Cog):
 		await ctx.send(embed=embed)
 
 
-	
+	@commands.command(name="hunt")
+	async def player_hunts(self, ctx):
+		output = game_hun.initiate_fight(str(ctx.author.id))
+
+		if output != "Player Died.":
+			monster_name, monster_damage, copper_drop, player_hp = output
+			embed = discord.Embed(title="Result of the Hunt!")
+			embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
+			embed.add_field(name=f"Result:", value=f"""
+					**{ctx.author.name}** encountered a **{monster_name}**, earned **{copper_drop}** pieces of copper and took **{monster_damage}** damage! {ctx.author.name} has remaining **{player_hp}/100** health!.
+				""", inline=False)
+			await ctx.send(embed=embed)
+		else:
+			await ctx.send(output)
 	
 
 	@commands.command(name="inv")
@@ -76,6 +85,16 @@ class Commands(commands.Cog):
 			embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
 			embed.add_field(name=f"{ctx.author.name}'s Cosmic Space", value=f"empty...") 
 			await ctx.send(embed=embed)
+
+
+	@commands.command(name="currex")
+	async def player_trades(self, ctx):
+		await ctx.send("currex(Currency Exchange) is under development By the Cafe, just chillax and sip some of that :coffee:")
+
+	
+	@commands.command(name="travel")
+	async def player_trancends(self, ctx):
+		await ctx.send("travelling is under development By the Cafe, just chillax and sip some of that :coffee:")
 
 
 def setup(bot):
