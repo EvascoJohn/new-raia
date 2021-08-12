@@ -1,5 +1,6 @@
 import sqlite3
 import random
+import threading
 
 
 class ShortDBCommands(object):
@@ -194,9 +195,11 @@ class CurrencyValues(object):
 			self.silver = cd.silver
 			self.gold = cd.gold
 
+		def trade(self):
+			print(self.copper)
+			print(self.silver)
+			print(self.gold)
 
-
-		
 
 class VillageShop(WorldInventory, TableOfWealth):
 
@@ -327,9 +330,6 @@ class Hunt(GeneralPlayers, MonsterTable, TableOfWealth):
 		return name, damage, copper_drop, player_hp
 
 
-
-
-
 class GameCommands(GeneralPlayers, VillageShop, TableOfWealth):
 
 	def __init__(self, database):
@@ -350,9 +350,22 @@ class GameCommands(GeneralPlayers, VillageShop, TableOfWealth):
 
 
 if __name__ == "__main__":
+	import time
 	db ="GameDB.db"
 	i = "519807756711649291"
 	c = "Warrior"
 	gc = GameCommands(db)
 	h = Hunt(db)
-	print(gc.new_player(i))
+	cur = CurrencyValues()
+
+
+	def update():
+		while 1:
+			time.sleep(0.7)
+			if int(time.strftime("%M")) == 26 and int(time.strftime("%S")) == 0:
+				print("time to update")
+				cur.run()
+				cur.trade()
+
+	t1 = threading.Thread(target=update)
+	t1.start()

@@ -28,9 +28,3 @@ def run():
 	if world > 1:
 		world = world - (world / 150)
 	move()
-
-run()
-
-print(copper)
-print(silver)
-print(gold)
