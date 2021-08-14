@@ -53,14 +53,14 @@ class GeneralPlayers(ShortDBCommands):
 		except sqlite3.IntegrityError as e:
 			#this will trigger if the player_id is already in the database
 			if e.args[0] == "UNIQUE constraint failed: GeneralPlayersDatabase.discord_id":
-				return "Player Already Exists"
+				return "You are already in transmigrated to Raia!"
 
 			#this will trigger if the player_class is not in the database.
 			elif e.args[0] == "FOREIGN KEY constraint failed":
 				return "Player Class Invalid"
 		else:
 			#this will trigger if the player is not yet in the database when added.
-			return "Welcome new player"
+			return "A Light suck you in the air! You've been Transmigrated in another World! Welcome to Raia"
 
 
 	def get_player(self, player_id):
@@ -73,11 +73,6 @@ class GeneralPlayers(ShortDBCommands):
 		self.exec_with_commit(f"""
 			UPDATE GeneralPlayersDatabase SET "player_hp" = {hp} WHERE "discord_id"="{player_id}"
 			""")
-
-
-	def get_class(self, player_id):
-		pass
-
 
 
 class WorldInventory(ShortDBCommands):
@@ -102,7 +97,6 @@ class WorldInventory(ShortDBCommands):
 			return checks_item
 		else:
 			return None
-
 
 
 class TableOfWealth(ShortDBCommands):
@@ -186,19 +180,29 @@ class WeaponItemsDatabase(ShortDBCommands):
 
 
 
-class CurrencyValues(object):
+class CurrencyValues(TableOfWealth):
 
-		def run(self):
-			import currency_dictator as cd
-			cd.run()
-			self.copper = cd.copper
-			self.silver = cd.silver
-			self.gold = cd.gold
+	def __init__(self, database):
+		self.database = database
 
-		def trade(self):
-			print(self.copper)
-			print(self.silver)
-			print(self.gold)
+	def run(self):
+		from python_game_commands import currency_dictator as cd
+		cd.run()
+		self.copper = cd.copper
+		self.silver = cd.silver
+		self.gold = cd.gold
+
+	def seeValues(self):
+		return self.copper, self.silver, self.gold
+
+	def copper_to_silver(self, player_id, amount):
+		total = self.copper * amount
+		try:
+			self.deduct_copper(player_id, total)
+			self.add_silver(player_id, amount)
+		except sqlite3.IntegrityError as e:
+			return e.args[0]
+		return self.copper, self.silver
 
 
 class VillageShop(WorldInventory, TableOfWealth):
@@ -291,7 +295,6 @@ class VillageShop(WorldInventory, TableOfWealth):
 		return "item succesfully sold."
 
 
-
 class MonsterTable(ShortDBCommands):
 
 	def __init__(self, database):
@@ -305,7 +308,6 @@ class MonsterTable(ShortDBCommands):
 		pick = monsters[int(random.randint(0, len(monsters)-1))]
 		name, damage, health, copper_drop = pick
 		return pick
-
  
 
 class Hunt(GeneralPlayers, MonsterTable, TableOfWealth):
@@ -322,7 +324,7 @@ class Hunt(GeneralPlayers, MonsterTable, TableOfWealth):
 		damage = 20
 		if damage >= player_hp:
 			self.set_player_health(player_id, 100)
-			return "Player Died."
+			return name, damage, copper_drop, 0
 		elif damage < player_hp:
 			player_hp = player_hp - damage
 			self.set_player_health(player_id, player_hp)
@@ -346,7 +348,6 @@ class GameCommands(GeneralPlayers, VillageShop, TableOfWealth):
 
 	def check_shop(self):
 		return self.shop()
-
 
 
 if __name__ == "__main__":

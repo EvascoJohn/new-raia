@@ -10,7 +10,7 @@ load_dotenv()
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 
-bot = commands.Bot(command_prefix='r/')
+bot = commands.Bot(command_prefix='r/', help_command=None)
 
 
 bot.load_extension("cogs.game_commands")
