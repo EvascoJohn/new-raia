@@ -130,18 +130,38 @@ class Commands(commands.Cog):
 	@commands.command(aliases=['trade', 't'])
 	async def player_trade(self, ctx, amount=0, *args):
 		command = " ".join([word for word in args])
-		output = cur.copper_to_silver(str(ctx.author.id), amount)
-		if command == "copper to silver" and output != "not enough silver.":
-			copper, silver = output
-			embed = discord.Embed(title="Trade of silver to copper!")
-			embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
-			embed.add_field(name=f"A trade of {int(copper)*amount} pieces Copper for an amount of {amount} Silver ", value=f"**{ctx.author.name}** has traded {int(copper)*amount} pieces of copper for an amount of {amount} Silver", inline=False)
-			await ctx.send(embed=embed)
-		
-		else:
-			embed = discord.Embed(title="Trade Problem: Not enough resources.")
-			embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
-			await ctx.send(embed=embed)
+
+		async def sub():
+			print("sub active")
+			if command == "copper to silver":
+				output = cur.copper_to_silver(str(ctx.author.id), amount)
+				if output == "not enough silver.":
+					embed = discord.Embed(title="Trade Problem: Not enough resources.")
+					embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
+					await ctx.send(embed=embed)
+					return
+				copper, silver = output
+				embed = discord.Embed(title="Trade of copper to silver!")
+				embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
+				embed.add_field(name=f"A trade of {int(copper)*amount} pieces Copper for an amount of {amount} Silver ", value=f"**{ctx.author.name}** has traded {int(copper)*amount} pieces of copper for an amount of {amount} Silver", inline=False)
+				await ctx.send(embed=embed)
+				return
+			
+			if command == "silver to copper":
+				output = cur.silver_to_copper(str(ctx.author.id), amount)
+				if output == "not enough silver.":
+					embed = discord.Embed(title="Trade Problem: Not enough resources.")
+					embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
+					await ctx.send(embed=embed)
+					return
+				copper, silver = output
+				embed = discord.Embed(title="Trade of silver to copper!")
+				embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
+				embed.add_field(name=f"A trade of {amount} pieces of Silver will be an amount of {int(copper)*amount} pieces of copper ", value=f"**{ctx.author.name}** has traded {amount} pieces of Silver will be an amount of {int(copper)*amount} Copper", inline=False)
+				await ctx.send(embed=embed)
+				return
+
+		await sub()
 
 def setup(bot):
 	bot.add_cog(Commands(bot))

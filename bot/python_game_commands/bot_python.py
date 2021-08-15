@@ -196,10 +196,23 @@ class CurrencyValues(TableOfWealth):
 		return self.copper, self.silver, self.gold
 
 	def copper_to_silver(self, player_id, amount):
+		if amount < 0:
+			return "not enough silver."
 		total = self.copper * amount
 		try:
 			self.deduct_copper(player_id, total)
 			self.add_silver(player_id, amount)
+		except sqlite3.IntegrityError as e:
+			return e.args[0]
+		return self.copper, self.silver
+	
+	def silver_to_copper(self, player_id, amount):
+		if amount < 0:
+			return "not enough silver."
+		total = self.copper * amount
+		try:
+			self.deduct_silver(player_id, amount)
+			self.add_copper(player_id, total)
 		except sqlite3.IntegrityError as e:
 			return e.args[0]
 		return self.copper, self.silver
