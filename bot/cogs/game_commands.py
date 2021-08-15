@@ -116,11 +116,17 @@ class Commands(commands.Cog):
 	async def help(self, ctx):
 		embed = discord.Embed(title="Help")
 		embed.set_author(name=str(ctx.author.name), icon_url=ctx.author.avatar_url)
-		embed.add_field(name=f"r/`join`", value="Adds the game to the game and gives them 1000 copper as starting money. Benefits will not work if the user has already joined.")
-		embed.add_field(name=f"r/`hunt`, r/`h`", value="Kills a random monster that exists in your current location for ex. `Village`\nHunt will give you `xp` and `copper`.")
-		embed.add_field(name=f"r/`shop`, r/`s`", value="Shows the shop of your current location.")
-		embed.add_field(name=f"r/`currex`, r/`cr`", value="It shows the `currex` or **Current Exchange** `currex` shows the currency's value for trading your copper to silver and silver to copper, silver to gold gold to silver and gold to copper depending on your favor during its its highs and lows.\n\nCheck out **r/**`trade` for more details in exchange")
-		embed.add_field(name=f"r/`trade, r/`t` `[amount] [currency to currency]`", value="for trading your copper to silver and silver to copper, silver to gold gold to silver and gold to copper depending on your favor during its highs and lows. Being able to utilize this method can be an alternative to `hunt` for gaining copper, and in the long run to join the **leaderboards** where your `gold` will be taken into account.\n\nSince this game has 3 currencies `copper`, `silver` and `gold`. In this game you will only accumalate copper during you `hunt`'s, and you will only spend `silver` on the shop, while `gold` the top of Currency Exchange will make you wealthier, managing how you trade will be an alternative for getting copper during you hunts.")
+		embed.add_field(name=f"`r/join`", value="```Adds the player to the game and gives them 1000 copper as starting money. Benefits will not work if the user has already joined.```")
+
+
+		embed.add_field(name=f"`r/hunt`, r/`h`", value="```Kills a random monster that exists in your current location.```")
+
+		embed.add_field(name=f"r/`shop`, r/`s`", value="```Shows the shop of your current location.```")
+
+		embed.add_field(name=f"`r/currex`, `r/cr`", value="```Shows the currex or Current Exchange this shows the currency's value for trading your copper to silver and silver to copper, silver to gold gold to silver and gold to copper depending on your favor during its its highs and lows.\n\nCheck out trade for more details in exchange.```")
+
+
+		embed.add_field(name=f"`r/trade`, `r/t`\nex.\n`r/trade [amount] [currency to currency]`", value="```For trading your copper to silver and silver to copper, silver to gold gold to silver and gold to copper depending on your favor during its highs and lows. Being able to utilize this method can be an alternative to `hunt` for gaining copper, and in the long run to join the leaderboards where your gold will be taken into account.\n\nSince this game has 3 currencies copper, silver and gold. In this game you will only accumalate copper during you hunt's, and you will only spend silver on the shop, while gold the top of Currency Exchange will make you wealthier, managing how you trade will be an alternative for getting copper during you hunts.```")
 		await ctx.send(embed=embed)
 	
 	@commands.command(name="travel")
